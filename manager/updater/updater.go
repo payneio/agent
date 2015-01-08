@@ -1,7 +1,7 @@
-// reloader will watch for a new version of a binary (filename.new).
+// updater will watch for a new version of a binary (filename.new).
 // When it sees a new version, it will stop the process, swap the binaries,
 // and restart a new process.
-package reloader
+package updater
 
 import (
 	"fmt"
