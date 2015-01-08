@@ -13,13 +13,18 @@ var agent Agent
 
 func main() {
 
-	config.ConfigFilename = "../conf/agent.toml"
-	err := config.Load()
-	if err != nil {
-		log.Fatalf("I could not load my configuration file: %v", err)
+	if err := init(); err != nil {
+		log.Fatalf("I could not initialize: %v", err)
 	}
-	agent.config = config.Config
-	log.Println(agent.config.Process.Start)
-	log.Println("Hello World.")
+	log.Printf("Loaded configuration v.%s\n", manager.config.Version)
 
+}
+
+func init() error {
+	config.ConfigFilename = "../conf/agent.toml"
+	if err := config.Load(); err != nil {
+		return err
+	}
+	manager.config = config.Config
+	return nil
 }
