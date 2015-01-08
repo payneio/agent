@@ -5,11 +5,13 @@ import (
 	"github.com/payneio/agent/config"
 	"github.com/payneio/agent/manager/reloader"
 	"github.com/payneio/agent/manager/updater"
+	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 )
 
-var manager Manager
+var manager = Manager{}
 
 type Manager struct {
 	config config.Configuration
@@ -17,9 +19,9 @@ type Manager struct {
 
 func main() {
 
-	manager = Manager{}
-
-	runReloader()
+	if err := runReloader(); err != nil {
+		log.Fatalf("I could not start the reloader: %v", err)
+	}
 	runUpdater()
 
 	select {}
@@ -35,12 +37,32 @@ func init() {
 	log.Printf("Loaded configuration v.%s\n", manager.config.Version)
 }
 
-func runReloader() {
-	pid := os.Getpid()
-	// TODO: get PID of agent (from PID file, likely)
+func getPid() (int, error) {
+	log.Println(manager.config.Process.PidFile)
+	pidBytes, err := ioutil.ReadFile(manager.config.Process.PidFile)
+	if err != nil {
+		return 0, err
+	}
+	pidS := string(pidBytes)
+	pid, err := strconv.ParseUint(pidS, 10, 32)
+	if err != nil {
+		return 0, err
+	}
+	return int(pid), nil
+}
+
+func runReloader() error {
+
+	pid, err := getPid()
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Got a PID for the reloader: %v\n", pid)
 	go func() {
 		reloader.RunWithCmd(pid, manager.config.Process.Start)
 	}()
+	return nil
 }
 
 func runUpdater() {
