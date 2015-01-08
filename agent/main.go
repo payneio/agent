@@ -6,7 +6,7 @@ import (
 )
 
 type Agent struct {
-	config config.CfgAgent
+	config config.Configuration
 }
 
 var agent Agent
@@ -20,7 +20,6 @@ func main() {
 	}
 	agent.config = config.Config
 	log.Println(agent.config.Process.Start)
-
 	log.Println("Hello World.")
 
 }

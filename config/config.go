@@ -4,18 +4,19 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-type Config struct {
-	Process
+type Configuration struct {
+	Version string
+	Process AgentProcess
 }
 
-type Process struct {
+type AgentProcess struct {
 	Start     string
 	Stop      string
 	Restart   string
 	Something int
 }
 
-var Config = new(Config)
+var Config Configuration
 var ConfigFilename string
 
 func Load() error {
