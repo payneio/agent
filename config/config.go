@@ -10,10 +10,10 @@ type Configuration struct {
 }
 
 type AgentProcess struct {
-	Start     string
-	Stop      string
-	Restart   string
-	Something int
+	Start   string
+	Stop    string
+	Restart string
+	PidFile string
 }
 
 var Config Configuration
