@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 )
 
 var manager = Manager{}
@@ -37,6 +38,31 @@ func init() {
 	log.Printf("Loaded configuration v.%s\n", manager.config.Version)
 }
 
+func runReloader() error {
+
+	go func() {
+		for {
+			pid, err := getPid()
+			if err != nil {
+				log.Printf("Could not get PID. Trying again. %v\n", err)
+				time.Sleep(1 * time.Second)
+			}
+			reloader.RunWithCmd(pid, manager.config.Process.Start)
+		}
+	}()
+
+	return nil
+
+}
+
+func runUpdater() {
+	pid := os.Getpid()
+	// TODO: get PID of agent (from PID file, likely)
+	go func() {
+		updater.RunWithCmd(pid, "agent", manager.config.Process.Stop)
+	}()
+}
+
 func getPid() (int, error) {
 	log.Println(manager.config.Process.PidFile)
 	pidBytes, err := ioutil.ReadFile(manager.config.Process.PidFile)
@@ -49,28 +75,6 @@ func getPid() (int, error) {
 		return 0, err
 	}
 	return int(pid), nil
-}
-
-func runReloader() error {
-
-	pid, err := getPid()
-	if err != nil {
-		return err
-	}
-
-	log.Printf("Got a PID for the reloader: %v\n", pid)
-	go func() {
-		reloader.RunWithCmd(pid, manager.config.Process.Start)
-	}()
-	return nil
-}
-
-func runUpdater() {
-	pid := os.Getpid()
-	// TODO: get PID of agent (from PID file, likely)
-	go func() {
-		updater.RunWithCmd(pid, "agent", manager.config.Process.Stop)
-	}()
 }
 
 // TODO: Handle SIGHUP: https://bitbucket.org/PinIdea/zero-downtime-daemon

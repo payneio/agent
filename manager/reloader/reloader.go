@@ -4,21 +4,21 @@ package reloader
 
 import (
 	"log"
-	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 	"time"
 )
 
 func Run(pid int, command string, args []string) {
 
-	change := make(chan bool)
+	change := make(chan bool, 1)
 
-	go watch(pid, change)
-	for {
+	if pid > 0 {
+		go watch(pid, change)
 		<-change
-		reload(pid, command, args)
 	}
+	reload(command, args)
 
 }
 
@@ -43,35 +43,29 @@ func watch(pid int, change chan bool) {
 
 		time.Sleep(1 * time.Second)
 
-		//  Poll existience of new file
-		_, err := os.FindProcess(pid)
-		if err != nil {
-			time.Sleep(1 * time.Second)
-			continue
-		}
+		// _, err := os.FindProcess(pid)
 
-		// change <- true
-		// break
+		// This works on POSIX only
+		// https://groups.google.com/forum/#!topic/golang-nuts/hqrp0UHBK9k
+		if err := syscall.Kill(pid, 0); err != nil {
+			change <- true
+			return
+		}
+		continue
 
 	}
 
 }
 
-// reload handles the dirty work of stopping and restarting a process.
-// It will stop the given pid, swap files and issue the given restart command.
-func reload(pid int, command string, args []string) {
+func reload(command string, args []string) {
 
 	log.Println("Agent died! Restarting.")
 
-	// restart
+	// restart the process
 	out, err := exec.Command(command, args...).Output()
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Printf("%s", out)
-
-	// TODO: get new pid
-
-	Run(pid, command, args)
 
 }
