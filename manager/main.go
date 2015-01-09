@@ -20,9 +20,7 @@ type Manager struct {
 
 func main() {
 
-	if err := runReloader(); err != nil {
-		log.Fatalf("I could not start the reloader: %v", err)
-	}
+	runReloader()
 	runUpdater()
 
 	select {}
@@ -38,7 +36,7 @@ func init() {
 	log.Printf("Loaded configuration v.%s\n", manager.config.Version)
 }
 
-func runReloader() error {
+func runReloader() {
 
 	go func() {
 		for {
@@ -50,8 +48,6 @@ func runReloader() error {
 			reloader.RunWithCmd(pid, manager.config.Process.Start)
 		}
 	}()
-
-	return nil
 
 }
 
