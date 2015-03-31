@@ -1,0 +1,9 @@
+Version = "0.1"
+
+[Process]
+Start = "/etc/init.d/agent start"
+Stop = "/etc/init.d/agent stop"
+Restart = "/etc/init.d/agent restart"
+PidFile = "~/.agent/agent.pid"
+# PidFile = "/var/run/agent.pid"
+

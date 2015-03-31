@@ -4,5 +4,4 @@ Version = "0.1"
 Start = "/etc/init.d/agent start"
 Stop = "/etc/init.d/agent stop"
 Restart = "/etc/init.d/agent restart"
-PidFile = "/home/payne/go/src/github.com/payneio/agent/agent.pid"
 

@@ -1,0 +1,5 @@
+Version = "0.1"
+
+[Process]
+PidFile = "~/.agent/agent.pid"
+

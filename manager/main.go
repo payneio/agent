@@ -2,6 +2,7 @@
 package main
 
 import (
+	"flag"
 	"github.com/payneio/agent/config"
 	"github.com/payneio/agent/manager/reloader"
 	"github.com/payneio/agent/manager/updater"
@@ -11,6 +12,8 @@ import (
 	"strconv"
 	"time"
 )
+
+var configFile = flag.String("config", "manager.toml", "The full path to the manager config file.")
 
 var manager = Manager{}
 
@@ -28,7 +31,7 @@ func main() {
 }
 
 func init() {
-	config.ConfigFilename = "../conf/agent.toml"
+	config.ConfigFilename = *configFile
 	if err := config.Load(); err != nil {
 		log.Fatalf("I could not initialize: %v", err)
 	}

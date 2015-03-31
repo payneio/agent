@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"github.com/payneio/agent/config"
 	"io/ioutil"
 	"log"
@@ -8,6 +9,8 @@ import (
 	"os/signal"
 	"strconv"
 )
+
+var configFile = flag.String("config", "agent.toml", "The full path to the agent config file.")
 
 var agent = Agent{}
 
@@ -30,18 +33,23 @@ func main() {
 }
 
 func init() {
-	config.ConfigFilename = "../conf/agent.toml"
+	flag.Parse()
+	config.ConfigFilename = *configFile
+	log.Println(config.ConfigFilename)
 	if err := config.Load(); err != nil {
 		log.Fatalf("I could not load my configuration file: %v", err)
 	}
 	agent.config = config.Config
 	log.Printf("Loaded configuration v.%s\n", agent.config.Version)
 
+	if err := os.MkdirAll("~/.agent", 755); err != nil {
+		log.Fatalf("I could not create a working directory: %v", err)
+	}
+
 	if err := writePid(); err != nil {
 		log.Fatalf("I could not write my PID file: %v", err)
 	}
 	log.Printf("Saved PID file to %s\n", agent.config.Process.PidFile)
-
 }
 
 func writePid() error {
